@@ -1,0 +1,6 @@
+trace: none
+io_format: int
+inputs:
+  0: [5, 42, 7, 99, 13, 5]   # количество=5, затем значения
+assert_output:
+  1: [5, 7, 13, 42, 99]

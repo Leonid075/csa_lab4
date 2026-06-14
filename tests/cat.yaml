@@ -1,0 +1,6 @@
+trace: none
+io_format: char
+inputs:
+  0: "Meow"
+assert_output:
+  1: [77, 101, 111, 119]
