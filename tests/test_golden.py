@@ -1,9 +1,3 @@
-"""Golden-тесты: каждая программа из tests/<name>.asm ассемблируется,
-исполняется на модели и сверяется с захардкоженным эталоном вывода.
-
-Кейсы (входные буферы, лимиты и ожидаемый вывод по портам) заданы явно
-в CASES — без чтения .yaml.
-"""
 import pathlib
 
 import machine
@@ -63,8 +57,7 @@ def check(name, inputs, cfg, expected):
     for port, exp in expected.items():
         got = res["io"].out.get(port, [])
         assert got == exp, (
-            f"{name}: порт {port} ожидалось {exp}, получено {got} "
-            f"(останов: {res['stop']})"
+            f"{name}: порт {port} ожидалось {exp}, получено {got} (останов: {res['stop']})"
         )
 
 

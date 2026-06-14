@@ -4,57 +4,57 @@ import os
 import re
 
 ASM = {
-    "AND":   ["addr",    "00000111"],
-    "OR":    ["addr",    "00000110"],
-    "XOR":   ["addr",    "00000101"],
-    "NOT":   ["noarg",   "00000011"],
-    "NEG":   ["noarg",   "00000010"],
-    "INC":   ["noarg",   "00000001"],
-    "DEC":   ["noarg",   "00000000"],
-    "ADD":   ["addr",    "00001111"],
-    "SUB":   ["addr",    "00001110"],
-    "MUL":   ["addr",    "00001101"],
-    "DIV":   ["addr",    "00001100"],
-    "ADC":   ["addr",    "00001011"],
-    "CMP":   ["addr",    "00001010"],
-    "SHL":   ["noarg",   "00010111"],
-    "SHR":   ["noarg",   "00010110"],
-    "ASL":   ["noarg",   "00010101"],
-    "ASR":   ["noarg",   "00010100"],
-    "CLO":   ["noarg",   "00010011"],
-    "CLC":   ["noarg",   "00010010"],
-    "JMP":   ["label",   "00011111"],
-    "BEZ":   ["label",   "00011110"],
-    "BLZ":   ["label",   "00011101"],
-    "BGZ":   ["label",   "00011100"],
-    "BCS":   ["label",   "00011011"],
-    "BOS":   ["label",   "00011010"],
-    "BCC":   ["label",   "00011001"],
-    "BOC":   ["label",   "00011000"],
-    "LD":    ["addr",    "00100111"],
-    "ST":    ["addr",    "00100110"],
-    "RD":    ["byteaddr","00100101"],
-    "WR":    ["byteaddr","00100100"],
-    "CALL":  ["label",   "00101111"],
-    "RET":   ["noarg",   "00101110"],
-    "SSP":   ["noarg",   "00101101"],
-    "LDIM":  ["value",   "00110111"],
-    "ADDIM": ["value",   "00110110"],
-    "HLT":   ["noarg",   "00111111"],
+    "AND": ["addr", "00000111"],
+    "OR": ["addr", "00000110"],
+    "XOR": ["addr", "00000101"],
+    "NOT": ["noarg", "00000011"],
+    "NEG": ["noarg", "00000010"],
+    "INC": ["noarg", "00000001"],
+    "DEC": ["noarg", "00000000"],
+    "ADD": ["addr", "00001111"],
+    "SUB": ["addr", "00001110"],
+    "MUL": ["addr", "00001101"],
+    "DIV": ["addr", "00001100"],
+    "ADC": ["addr", "00001011"],
+    "CMP": ["addr", "00001010"],
+    "SHL": ["noarg", "00010111"],
+    "SHR": ["noarg", "00010110"],
+    "ASL": ["noarg", "00010101"],
+    "ASR": ["noarg", "00010100"],
+    "CLO": ["noarg", "00010011"],
+    "CLC": ["noarg", "00010010"],
+    "JMP": ["label", "00011111"],
+    "BEZ": ["label", "00011110"],
+    "BLZ": ["label", "00011101"],
+    "BGZ": ["label", "00011100"],
+    "BCS": ["label", "00011011"],
+    "BOS": ["label", "00011010"],
+    "BCC": ["label", "00011001"],
+    "BOC": ["label", "00011000"],
+    "LD": ["addr", "00100111"],
+    "ST": ["addr", "00100110"],
+    "RD": ["byteaddr", "00100101"],
+    "WR": ["byteaddr", "00100100"],
+    "CALL": ["label", "00101111"],
+    "RET": ["noarg", "00101110"],
+    "SSP": ["noarg", "00101101"],
+    "LDIM": ["value", "00110111"],
+    "ADDIM": ["value", "00110110"],
+    "HLT": ["noarg", "00111111"],
 }
 
 I_SIZE = {
-    "noarg":   1,
-    "addr":    5,
-    "label":   5,
-    "value":   4,
-    "byteaddr":4,
+    "noarg": 1,
+    "addr": 5,
+    "label": 5,
+    "value": 4,
+    "byteaddr": 4,
 }
 
 NUM_IO_PORTS = 8
 
 STR_RE = re.compile(r'\.str\s+"((?:[^"\\]|\\.)*)"')
-LABEL_RE = re.compile(r'^([A-Za-z_][A-Za-z0-9_]*)\s*:\s*')
+LABEL_RE = re.compile(r"^([A-Za-z_][A-Za-z0-9_]*)\s*:\s*")
 
 
 def parse_value(s: str) -> int:
@@ -73,7 +73,7 @@ def strip_comment(line: str) -> str:
     while i < n:
         c = line[i]
         if in_string:
-            if c == '\\':
+            if c == "\\":
                 i += 2
                 continue
             if c == '"':
@@ -81,7 +81,7 @@ def strip_comment(line: str) -> str:
         else:
             if c == '"':
                 in_string = True
-            elif c == ';':
+            elif c == ";":
                 return line[:i].strip()
         i += 1
     return line.strip()
@@ -148,15 +148,13 @@ def preprocess(lines: list[str]) -> list[str]:
 
 def _subst_outside_strings(line: str, name: str, value: str) -> str:
     """Replace whole-word `name` with `value`, but never inside a string literal."""
-    pattern = re.compile(
-        r'"(?:\\.|[^"\\])*"|"(?:\\.|[^"\\])*$|\b' + re.escape(name) + r'\b'
-    )
+    pattern = re.compile(r'"(?:\\.|[^"\\])*"|"(?:\\.|[^"\\])*$|\b' + re.escape(name) + r"\b")
 
     def repl(m: re.Match) -> str:
         text = m.group(0)
         if text.startswith('"'):
             if not (len(text) > 1 and text.endswith('"')):
-                raise ValueError(f'wrong string: {line!r}')
+                raise ValueError(f"wrong string: {line!r}")
             return text
         return value
 
@@ -200,7 +198,7 @@ def _layout_section(
         rest = line
         while m := LABEL_RE.match(rest):
             labels[m.group(1)] = pc
-            rest = rest[m.end():]
+            rest = rest[m.end() :]
 
         if not rest:
             continue
@@ -253,31 +251,31 @@ def decode_string(s: str) -> str:
     result = []
     i = 0
     while i < len(s):
-        if s[i] == '\\' and i + 1 < len(s):
+        if s[i] == "\\" and i + 1 < len(s):
             c = s[i + 1]
-            if c == 'n':
-                result.append('\n')
-            elif c == 't':
-                result.append('\t')
-            elif c == '\\':
-                result.append('\\')
+            if c == "n":
+                result.append("\n")
+            elif c == "t":
+                result.append("\t")
+            elif c == "\\":
+                result.append("\\")
             elif c == '"':
                 result.append('"')
-            elif c == '0':
-                result.append('\0')
+            elif c == "0":
+                result.append("\0")
             else:
                 result.append(c)
             i += 2
         else:
             result.append(s[i])
             i += 1
-    return ''.join(result)
+    return "".join(result)
 
 
 def encode_u32_be(value: int) -> bytes:
     """Encode a 32-bit unsigned integer as 4 big-endian bytes."""
     value = value & 0xFFFFFFFF
-    return value.to_bytes(4, byteorder='big')
+    return value.to_bytes(4, byteorder="big")
 
 
 def resolve(arg: str, labels: dict[str, int], lineno: int, what: str) -> int:
@@ -286,8 +284,8 @@ def resolve(arg: str, labels: dict[str, int], lineno: int, what: str) -> int:
         return labels[arg]
     try:
         return parse_value(arg)
-    except ValueError:
-        raise SyntaxError(f"Line {lineno}: undefined label or invalid {what} '{arg}'")
+    except ValueError as err:
+        raise SyntaxError(f"Line {lineno}: undefined label or invalid {what} '{arg}'") from err
 
 
 def second_pass(
@@ -331,12 +329,12 @@ def second_pass(
         arg = parts[1].strip() if len(parts) > 1 else ""
 
         indirect = False
-        m_indirect = re.match(r'^\(\[(.+)\]\)$', arg)
+        m_indirect = re.match(r"^\(\[(.+)\]\)$", arg)
         if m_indirect:
             indirect = True
             arg = m_indirect.group(1).strip()
         else:
-            m_direct = re.match(r'^\((.+)\)$', arg)
+            m_direct = re.match(r"^\((.+)\)$", arg)
             if m_direct:
                 arg = m_direct.group(1).strip()
             elif arg.startswith("[") and arg.endswith("]"):
@@ -350,9 +348,7 @@ def second_pass(
         opcode = int(opcode_bits, 2)
 
         if indirect and kind != "addr":
-            raise SyntaxError(
-                f"Line {lineno}: indirect addressing not allowed for '{mnemonic}' "
-            )
+            raise SyntaxError(f"Line {lineno}: indirect addressing not allowed for '{mnemonic}' ")
 
         if kind == "noarg":
             emit(addr, bytes([opcode]))
@@ -370,19 +366,15 @@ def second_pass(
         elif kind == "byteaddr":
             try:
                 port = parse_value(arg)
-            except ValueError:
-                raise SyntaxError(f"Line {lineno}: invalid port number '{arg}'")
+            except ValueError as err:
+                raise SyntaxError(f"Line {lineno}: invalid port number '{arg}'") from err
             if not (0 <= port < NUM_IO_PORTS):
                 raise SyntaxError(f"Line {lineno}: invalid port number '{arg}'")
-            
+
             if mnemonic == "RD" and port % 2 != 0:
-                raise SyntaxError(
-                    f"Line {lineno}: RD reads from an input port"
-                )
+                raise SyntaxError(f"Line {lineno}: RD reads from an input port")
             if mnemonic == "WR" and port % 2 == 0:
-                raise SyntaxError(
-                    f"Line {lineno}: WR writes to an output port"
-                )
+                raise SyntaxError(f"Line {lineno}: WR writes to an output port")
             onehot = (1 << port) & 0xFF
             emit(addr, bytes([opcode, 0x00, 0x00, onehot]))
 
@@ -396,7 +388,7 @@ def build_listing(
     """Debug listing, one line per item:  <ADDR> - <HEXCODE> - <mnemonic>."""
     lines = [
         f"{addr:04X} - {data.hex().upper()} - {content}"
-        for (_lineno, addr, content), (_addr, data) in zip(instructions, chunks)
+        for (_lineno, addr, content), (_addr, data) in zip(instructions, chunks, strict=True)
     ]
     return "\n".join(lines) + ("\n" if lines else "")
 
@@ -418,7 +410,7 @@ def translate(asm_file: io.TextIOWrapper, bin_file: io.RawIOBase, listing_file=N
     size = max(addr + len(data) for addr, data in chunks)
     binary = bytearray(size)
     for addr, data in chunks:
-        binary[addr:addr + len(data)] = data
+        binary[addr : addr + len(data)] = data
 
     bin_file.write(bytes(binary))
 
@@ -426,10 +418,12 @@ def translate(asm_file: io.TextIOWrapper, bin_file: io.RawIOBase, listing_file=N
 def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument("asm_file", help="input assembler filename")
-    parser.add_argument("bin_file", nargs="?", help="output binary filename "
-                                                    "(default: ./tmp/<asm_file>.bin)")
-    parser.add_argument("--listing", "-l", help="optional debug listing output "
-                                                 "(<addr> - <hexcode> - <mnemonic>)")
+    parser.add_argument(
+        "bin_file", nargs="?", help="output binary filename (default: ./tmp/<asm_file>.bin)"
+    )
+    parser.add_argument(
+        "--listing", "-l", help="optional debug listing output (<addr> - <hexcode> - <mnemonic>)"
+    )
     args = parser.parse_args()
     if args.bin_file is None:
         base = os.path.splitext(os.path.basename(args.asm_file))[0]
@@ -441,10 +435,9 @@ if __name__ == "__main__":
     args = parse_args()
     assert os.path.exists(args.asm_file), f"File not found: {args.asm_file}"
     os.makedirs(os.path.dirname(args.bin_file) or ".", exist_ok=True)
-    with io.open(args.asm_file, "r", encoding="utf-8") as asm:
-        with io.FileIO(args.bin_file, "wb") as bin_out:
-            if args.listing:
-                with io.open(args.listing, "w", encoding="utf-8") as lst:
-                    translate(asm, bin_out, lst)
-            else:
-                translate(asm, bin_out)
+    with open(args.asm_file, encoding="utf-8") as asm, io.FileIO(args.bin_file, "wb") as bin_out:
+        if args.listing:
+            with open(args.listing, "w", encoding="utf-8") as lst:
+                translate(asm, bin_out, lst)
+        else:
+            translate(asm, bin_out)

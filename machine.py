@@ -6,42 +6,43 @@ import yaml
 MASK = 0xFFFFFFFF
 
 MICROCODE = [
-  # --- FETCH ---
+    # --- FETCH ---
     (0x00, 0x00, 0x20, 0x00, 0x02, 0x02),  # 000 FETCH: AR <- IP
-    (0x08, 0x00, 0x08, 0x00, 0x02, 0x00),  # 001 FETCH: CR <- mem[AR]  (opcode in CR[31:24])
-  # --- DECODE ---
+    # 001 FETCH: CR <- mem[AR]  (opcode in CR[31:24])
+    (0x08, 0x00, 0x08, 0x00, 0x02, 0x00),
+    # --- DECODE ---
     (0x80, 0x08, 0x1D, 0x00, 0x02, 0x08),  # 002 DECODE: bit5 -> 1xx
     (0x80, 0x06, 0x1C, 0x00, 0x02, 0x08),  # 003 DECODE: bit4 -> 01x
     (0x80, 0x2B, 0x1B, 0x00, 0x02, 0x08),  # 004 DECODE: bit3 -> 001
     (0xA0, 0x0D, 0x00, 0x00, 0x02, 0x00),  # 005 -> 000
-  # --- D01 ---
+    # --- D01 ---
     (0x80, 0x57, 0x1B, 0x00, 0x02, 0x08),  # 006 -> 011
     (0xA0, 0x45, 0x00, 0x00, 0x02, 0x00),  # 007 -> 010
-  # --- D1 ---
+    # --- D1 ---
     (0x80, 0x0B, 0x1C, 0x00, 0x02, 0x08),  # 008 bit4 -> 11x
     (0x80, 0x93, 0x1B, 0x00, 0x02, 0x08),  # 009 -> 101
     (0xA0, 0x79, 0x00, 0x00, 0x02, 0x00),  # 010 -> 100
-  # --- D11 ---
+    # --- D11 ---
     (0x80, 0xAF, 0x1B, 0x00, 0x02, 0x08),  # 011 -> 111
     (0xA0, 0xA8, 0x00, 0x00, 0x02, 0x00),  # 012 -> 110
-  # --- G000 ---
+    # --- G000 ---
     (0x80, 0x1A, 0x1A, 0x00, 0x02, 0x08),  # 013 bit2 -> address ops
     (0x00, 0x00, 0x02, 0x08, 0x00, 0x02),  # 014 IP <- IP+1
     (0x80, 0x15, 0x19, 0x00, 0x02, 0x08),  # 015 bit1 -> NEG/NOT
     (0x80, 0x13, 0x18, 0x00, 0x02, 0x08),  # 016 bit0 -> INC
     (0x00, 0x00, 0x41, 0x10, 0x00, 0x01),  # 017 DEC: ACC <- ACC-1; SR
     (0xA0, 0x00, 0x00, 0x00, 0x02, 0x00),  # 018 -> COMMON
-  # --- DO_INC ---
+    # --- DO_INC ---
     (0x00, 0x00, 0x41, 0x08, 0x00, 0x01),  # 019 INC: ACC <- ACC+1; SR
     (0xA0, 0x00, 0x00, 0x00, 0x02, 0x00),  # 020 -> COMMON
-  # --- G000_NEGNOT ---
+    # --- G000_NEGNOT ---
     (0x80, 0x18, 0x18, 0x00, 0x02, 0x08),  # 021 bit0 -> NOT
     (0x00, 0x00, 0x41, 0x00, 0x10, 0x01),  # 022 NEG: ACC <- -ACC; SR
     (0xA0, 0x00, 0x00, 0x00, 0x02, 0x00),  # 023 -> COMMON
-  # --- DO_NOT ---
+    # --- DO_NOT ---
     (0x00, 0x00, 0x41, 0x00, 0x04, 0x01),  # 024 NOT: ACC <- ~ACC; SR
     (0xA0, 0x00, 0x00, 0x00, 0x02, 0x00),  # 025 -> COMMON
-  # --- G000_ADDR ---
+    # --- G000_ADDR ---
     (0x00, 0x00, 0x02, 0x08, 0x00, 0x02),  # 026 AND/OR/XOR: IP <- IP+1
     (0x00, 0x00, 0x20, 0x00, 0x02, 0x02),  # 027 AND/OR/XOR: AR <- IP
     (0x08, 0x00, 0x04, 0x00, 0x02, 0x00),  # 028 AND/OR/XOR: DR <- mem[AR]
@@ -49,20 +50,22 @@ MICROCODE = [
     (0x00, 0x00, 0x20, 0x00, 0x02, 0x04),  # 030 AND/OR/XOR: AR <- DR
     (0x08, 0x00, 0x04, 0x00, 0x02, 0x00),  # 031 AND/OR/XOR: DR <- mem[AR]
     (0xA0, 0x23, 0x1F, 0x00, 0x02, 0x08),  # 032 AND/OR/XOR: direct? -> G000_DO
-    (0x00, 0x00, 0x20, 0x00, 0x02, 0x04),  # 033 AND/OR/XOR: AR <- DR (indirect)
-    (0x08, 0x00, 0x04, 0x00, 0x02, 0x00),  # 034 AND/OR/XOR: DR <- mem[AR] (indirect)
-  # --- G000_DO ---
+    # 033 AND/OR/XOR: AR <- DR (indirect)
+    (0x00, 0x00, 0x20, 0x00, 0x02, 0x04),
+    # 034 AND/OR/XOR: DR <- mem[AR] (indirect)
+    (0x08, 0x00, 0x04, 0x00, 0x02, 0x00),
+    # --- G000_DO ---
     (0x80, 0x26, 0x19, 0x00, 0x02, 0x08),  # 035 bit1 -> OR/AND
     (0x00, 0x00, 0x41, 0x00, 0x08, 0x05),  # 036 XOR: ACC <- ACC xor DR; SR
     (0xA0, 0x00, 0x00, 0x00, 0x02, 0x00),  # 037 -> COMMON
-  # --- G000_OR_AND ---
+    # --- G000_OR_AND ---
     (0x80, 0x29, 0x18, 0x00, 0x02, 0x08),  # 038 bit0 -> AND
     (0x00, 0x00, 0x41, 0x00, 0x02, 0x05),  # 039 OR: ACC <- ACC or DR; SR
     (0xA0, 0x00, 0x00, 0x00, 0x02, 0x00),  # 040 -> COMMON
-  # --- DO_AND ---
+    # --- DO_AND ---
     (0x00, 0x00, 0x41, 0x00, 0x01, 0x05),  # 041 AND: ACC <- ACC and DR; SR
     (0xA0, 0x00, 0x00, 0x00, 0x02, 0x00),  # 042 -> COMMON
-  # --- G001 ---
+    # --- G001 ---
     (0x00, 0x00, 0x02, 0x08, 0x00, 0x02),  # 043 G1: IP <- IP+1
     (0x00, 0x00, 0x20, 0x00, 0x02, 0x02),  # 044 G1: AR <- IP
     (0x08, 0x00, 0x04, 0x00, 0x02, 0x00),  # 045 G1: DR <- mem[AR]
@@ -72,54 +75,54 @@ MICROCODE = [
     (0xA0, 0x34, 0x1F, 0x00, 0x02, 0x08),  # 049 G1: direct? -> G001_DO
     (0x00, 0x00, 0x20, 0x00, 0x02, 0x04),  # 050 G1: AR <- DR (indirect)
     (0x08, 0x00, 0x04, 0x00, 0x02, 0x00),  # 051 G1: DR <- mem[AR] (indirect)
-  # --- G001_DO ---
+    # --- G001_DO ---
     (0x80, 0x3A, 0x1A, 0x00, 0x02, 0x08),  # 052 bit2 -> 4..7
     (0x80, 0x38, 0x18, 0x00, 0x02, 0x08),  # 053 bit0 -> ADC
     (0x00, 0x00, 0x40, 0x04, 0x00, 0x05),  # 054 CMP: ACC-DR -> SR
     (0xA0, 0x00, 0x00, 0x00, 0x02, 0x00),  # 055 -> COMMON
-  # --- DO_ADC ---
+    # --- DO_ADC ---
     (0x00, 0x00, 0x41, 0x02, 0x00, 0x05),  # 056 ADC: ACC <- ACC+DR+C; SR
     (0xA0, 0x00, 0x00, 0x00, 0x02, 0x00),  # 057 -> COMMON
-  # --- G001_4 ---
+    # --- G001_4 ---
     (0x80, 0x40, 0x19, 0x00, 0x02, 0x08),  # 058 bit1 -> 6/7
     (0x80, 0x3E, 0x18, 0x00, 0x02, 0x08),  # 059 bit0 -> MUL
     (0x00, 0x00, 0x41, 0x01, 0x00, 0x05),  # 060 DIV: ACC <- ACC/DR; SR
     (0xA0, 0x00, 0x00, 0x00, 0x02, 0x00),  # 061 -> COMMON
-  # --- DO_MUL ---
+    # --- DO_MUL ---
     (0x00, 0x00, 0x41, 0x00, 0x80, 0x05),  # 062 MUL: ACC <- ACC*DR; SR
     (0xA0, 0x00, 0x00, 0x00, 0x02, 0x00),  # 063 -> COMMON
-  # --- G001_6 ---
+    # --- G001_6 ---
     (0x80, 0x43, 0x18, 0x00, 0x02, 0x08),  # 064 bit0 -> ADD
     (0x00, 0x00, 0x41, 0x00, 0x40, 0x05),  # 065 SUB: ACC <- ACC-DR; SR
     (0xA0, 0x00, 0x00, 0x00, 0x02, 0x00),  # 066 -> COMMON
-  # --- DO_ADD ---
+    # --- DO_ADD ---
     (0x00, 0x00, 0x41, 0x00, 0x20, 0x05),  # 067 ADD: ACC <- ACC+DR; SR
     (0xA0, 0x00, 0x00, 0x00, 0x02, 0x00),  # 068 -> COMMON
-  # --- G010 ---
+    # --- G010 ---
     (0x00, 0x00, 0x02, 0x08, 0x00, 0x02),  # 069 IP <- IP+1
     (0x80, 0x4C, 0x1A, 0x00, 0x02, 0x08),  # 070 bit2 -> shifts
     (0x80, 0x4A, 0x18, 0x00, 0x02, 0x08),  # 071 bit0 -> CLO
     (0x00, 0x40, 0x40, 0x00, 0x02, 0x40),  # 072 CLC: C <- 0
     (0xA0, 0x00, 0x00, 0x00, 0x02, 0x00),  # 073 -> COMMON
-  # --- DO_CLO ---
+    # --- DO_CLO ---
     (0x00, 0x20, 0x40, 0x00, 0x02, 0x40),  # 074 CLO: O <- 0
     (0xA0, 0x00, 0x00, 0x00, 0x02, 0x00),  # 075 -> COMMON
-  # --- G010_4 ---
+    # --- G010_4 ---
     (0x80, 0x52, 0x19, 0x00, 0x02, 0x08),  # 076 bit1 -> SHR/SHL
     (0x80, 0x50, 0x18, 0x00, 0x02, 0x08),  # 077 bit0 -> ASL
     (0x00, 0x10, 0x41, 0x00, 0x02, 0x01),  # 078 ASR: ACC <- ACC>>1 arith.; SR
     (0xA0, 0x00, 0x00, 0x00, 0x02, 0x00),  # 079 -> COMMON
-  # --- DO_ASL ---
+    # --- DO_ASL ---
     (0x00, 0x08, 0x41, 0x00, 0x02, 0x01),  # 080 ASL: ACC <- ACC<<1 arith.; SR
     (0xA0, 0x00, 0x00, 0x00, 0x02, 0x00),  # 081 -> COMMON
-  # --- G010_6 ---
+    # --- G010_6 ---
     (0x80, 0x55, 0x18, 0x00, 0x02, 0x08),  # 082 bit0 -> SHL
     (0x00, 0x04, 0x41, 0x00, 0x02, 0x01),  # 083 SHR: ACC <- ACC>>1 logic.; SR
     (0xA0, 0x00, 0x00, 0x00, 0x02, 0x00),  # 084 -> COMMON
-  # --- DO_SHL ---
+    # --- DO_SHL ---
     (0x00, 0x02, 0x41, 0x00, 0x02, 0x01),  # 085 SHL: ACC <- ACC<<1 logic.; SR
     (0xA0, 0x00, 0x00, 0x00, 0x02, 0x00),  # 086 -> COMMON
-  # --- G011 ---
+    # --- G011 ---
     (0x00, 0x00, 0x02, 0x08, 0x00, 0x02),  # 087 BR: IP <- IP+1
     (0x00, 0x00, 0x20, 0x00, 0x02, 0x02),  # 088 BR: AR <- IP
     (0x08, 0x00, 0x04, 0x00, 0x02, 0x00),  # 089 BR: DR <- mem[AR]
@@ -129,52 +132,52 @@ MICROCODE = [
     (0x80, 0x60, 0x18, 0x00, 0x02, 0x08),  # 093 bit0 -> BCC
     (0xA0, 0x77, 0x02, 0x00, 0x02, 0x40),  # 094 BOC: O==0 -> branch taken
     (0xA0, 0x00, 0x00, 0x00, 0x02, 0x00),  # 095 -> COMMON
-  # --- DO_BCC ---
+    # --- DO_BCC ---
     (0xA0, 0x77, 0x03, 0x00, 0x02, 0x40),  # 096 BCC: C==0 -> branch taken
     (0xA0, 0x00, 0x00, 0x00, 0x02, 0x00),  # 097 -> COMMON
-  # --- G011_2 ---
+    # --- G011_2 ---
     (0x80, 0x65, 0x18, 0x00, 0x02, 0x08),  # 098 bit0 -> BCS
     (0x80, 0x77, 0x02, 0x00, 0x02, 0x40),  # 099 BOS: O==1 -> branch taken
     (0xA0, 0x00, 0x00, 0x00, 0x02, 0x00),  # 100 -> COMMON
-  # --- DO_BCS ---
+    # --- DO_BCS ---
     (0x80, 0x77, 0x03, 0x00, 0x02, 0x40),  # 101 BCS: C==1 -> branch taken
     (0xA0, 0x00, 0x00, 0x00, 0x02, 0x00),  # 102 -> COMMON
-  # --- G011_4 ---
+    # --- G011_4 ---
     (0x80, 0x73, 0x19, 0x00, 0x02, 0x08),  # 103 bit1 -> 6/7
     (0x80, 0x6E, 0x18, 0x00, 0x02, 0x08),  # 104 bit0 -> BLZ
     (0x80, 0x6C, 0x00, 0x00, 0x02, 0x40),  # 105 BGZ: N==1?
     (0xA0, 0x77, 0x02, 0x00, 0x02, 0x40),  # 106 BGZ: N==0,O==0 -> branch taken
     (0xA0, 0x00, 0x00, 0x00, 0x02, 0x00),  # 107 -> COMMON
-  # --- BGZ_N1 ---
+    # --- BGZ_N1 ---
     (0x80, 0x77, 0x02, 0x00, 0x02, 0x40),  # 108 BGZ: N==1,O==1 -> branch taken
     (0xA0, 0x00, 0x00, 0x00, 0x02, 0x00),  # 109 -> COMMON
-  # --- DO_BLZ ---
+    # --- DO_BLZ ---
     (0x80, 0x71, 0x00, 0x00, 0x02, 0x40),  # 110 BLZ: N==1?
     (0x80, 0x77, 0x02, 0x00, 0x02, 0x40),  # 111 BLZ: N==0,O==1 -> branch taken
     (0xA0, 0x00, 0x00, 0x00, 0x02, 0x00),  # 112 -> COMMON
-  # --- BLZ_N1 ---
+    # --- BLZ_N1 ---
     (0xA0, 0x77, 0x02, 0x00, 0x02, 0x40),  # 113 BLZ: N==1,O==0 -> branch taken
     (0xA0, 0x00, 0x00, 0x00, 0x02, 0x00),  # 114 -> COMMON
-  # --- G011_6 ---
+    # --- G011_6 ---
     (0x80, 0x76, 0x18, 0x00, 0x02, 0x08),  # 115 bit0 -> JMP
     (0x80, 0x77, 0x01, 0x00, 0x02, 0x40),  # 116 BEZ: Z==1 -> branch taken
     (0xA0, 0x00, 0x00, 0x00, 0x02, 0x00),  # 117 -> COMMON
-  # --- DO_JMP ---
+    # --- DO_JMP ---
     (0xA0, 0x77, 0x00, 0x00, 0x02, 0x00),  # 118 JMP: unconditional
-  # --- TAKE_BR ---
+    # --- TAKE_BR ---
     (0x00, 0x00, 0x02, 0x00, 0x02, 0x04),  # 119 branch: IP <- DR
     (0xA0, 0x00, 0x00, 0x00, 0x02, 0x00),  # 120 -> COMMON
-  # --- G100 ---
+    # --- G100 ---
     (0x80, 0x81, 0x19, 0x00, 0x02, 0x08),  # 121 bit1 -> LD/ST
     (0x00, 0x00, 0x02, 0x20, 0x00, 0x02),  # 122 IP <- IP+4
     (0x00, 0x01, 0x20, 0x00, 0x02, 0x08),  # 123 AR <- VAL(CR)  (port one-hot)
     (0x80, 0x7F, 0x18, 0x00, 0x02, 0x08),  # 124 bit0 -> RD
     (0x04, 0x00, 0x00, 0x00, 0x02, 0x01),  # 125 WR: io[AR] <- ACC
     (0xA0, 0x00, 0x00, 0x00, 0x02, 0x00),  # 126 -> COMMON
-  # --- DO_RD ---
+    # --- DO_RD ---
     (0x02, 0x00, 0x41, 0x00, 0x02, 0x00),  # 127 RD: ACC <- io[AR]; SR
     (0xA0, 0x00, 0x00, 0x00, 0x02, 0x00),  # 128 -> COMMON
-  # --- G100_MEM ---
+    # --- G100_MEM ---
     (0x00, 0x00, 0x02, 0x08, 0x00, 0x02),  # 129 LD/ST: IP <- IP+1
     (0x00, 0x00, 0x20, 0x00, 0x02, 0x02),  # 130 LD/ST: AR <- IP
     (0x08, 0x00, 0x04, 0x00, 0x02, 0x00),  # 131 LD/ST: DR <- mem[AR]
@@ -184,24 +187,24 @@ MICROCODE = [
     (0xA0, 0x8A, 0x1F, 0x00, 0x02, 0x08),  # 135 ST: direct? -> store
     (0x08, 0x00, 0x04, 0x00, 0x02, 0x00),  # 136 ST: DR <- mem[AR] (indirect)
     (0x00, 0x00, 0x20, 0x00, 0x02, 0x04),  # 137 ST: AR <- DR (indirect)
-  # --- ST_STORE ---
+    # --- ST_STORE ---
     (0x10, 0x00, 0x00, 0x00, 0x02, 0x01),  # 138 ST: mem[AR] <- ACC
     (0xA0, 0x00, 0x00, 0x00, 0x02, 0x00),  # 139 -> COMMON
-  # --- DO_LD ---
+    # --- DO_LD ---
     (0x00, 0x00, 0x20, 0x00, 0x02, 0x04),  # 140 LD: AR <- DR
     (0x08, 0x00, 0x04, 0x00, 0x02, 0x00),  # 141 LD: DR <- mem[AR]
     (0xA0, 0x91, 0x1F, 0x00, 0x02, 0x08),  # 142 LD: direct? -> LD_DONE
     (0x00, 0x00, 0x20, 0x00, 0x02, 0x04),  # 143 LD: AR <- DR (indirect)
     (0x08, 0x00, 0x04, 0x00, 0x02, 0x00),  # 144 LD: DR <- mem[AR] (indirect)
-  # --- LD_DONE ---
+    # --- LD_DONE ---
     (0x00, 0x00, 0x41, 0x00, 0x02, 0x04),  # 145 LD: ACC <- DR; SR
     (0xA0, 0x00, 0x00, 0x00, 0x02, 0x00),  # 146 -> COMMON
-  # --- G101 ---
+    # --- G101 ---
     (0x80, 0x97, 0x19, 0x00, 0x02, 0x08),  # 147 bit1 -> RET/CALL
     (0x00, 0x00, 0x02, 0x08, 0x00, 0x02),  # 148 IP <- IP+1
     (0x00, 0x00, 0x10, 0x00, 0x02, 0x01),  # 149 SSP: SP <- ACC
     (0xA0, 0x00, 0x00, 0x00, 0x02, 0x00),  # 150 -> COMMON
-  # --- G101_RC ---
+    # --- G101_RC ---
     (0x80, 0x9F, 0x18, 0x00, 0x02, 0x08),  # 151 bit0 -> CALL
     (0x00, 0x00, 0x20, 0x00, 0x02, 0x10),  # 152 RET: AR <- SP
     (0x08, 0x00, 0x02, 0x00, 0x02, 0x00),  # 153 RET: IP <- mem[SP]
@@ -210,7 +213,7 @@ MICROCODE = [
     (0x00, 0x00, 0x10, 0x10, 0x00, 0x10),  # 156 RET: SP <- SP-1
     (0x00, 0x00, 0x10, 0x10, 0x00, 0x10),  # 157 RET: SP <- SP-1
     (0xA0, 0x00, 0x00, 0x00, 0x02, 0x00),  # 158 -> COMMON
-  # --- DO_CALL ---
+    # --- DO_CALL ---
     (0x00, 0x00, 0x02, 0x08, 0x00, 0x02),  # 159 CALL: IP <- IP+1
     (0x00, 0x00, 0x20, 0x00, 0x02, 0x02),  # 160 CALL: AR <- IP
     (0x08, 0x00, 0x04, 0x00, 0x02, 0x00),  # 161 CALL: DR <- mem[AR]
@@ -220,16 +223,16 @@ MICROCODE = [
     (0x10, 0x00, 0x00, 0x00, 0x02, 0x02),  # 165 CALL: mem[SP] <- IP
     (0x00, 0x00, 0x02, 0x00, 0x02, 0x04),  # 166 CALL: IP <- DR
     (0xA0, 0x00, 0x00, 0x00, 0x02, 0x00),  # 167 -> COMMON
-  # --- G110 ---
+    # --- G110 ---
     (0x00, 0x00, 0x02, 0x20, 0x00, 0x02),  # 168 IP <- IP+4
     (0x80, 0xAD, 0x18, 0x00, 0x02, 0x08),  # 169 bit0 -> LDIM
     (0x00, 0x01, 0x04, 0x00, 0x02, 0x08),  # 170 ADDIM: DR <- VAL(CR)
     (0x00, 0x00, 0x41, 0x00, 0x20, 0x05),  # 171 ADDIM: ACC <- ACC+DR; SR
     (0xA0, 0x00, 0x00, 0x00, 0x02, 0x00),  # 172 -> COMMON
-  # --- DO_LDIM ---
+    # --- DO_LDIM ---
     (0x00, 0x01, 0x41, 0x00, 0x02, 0x08),  # 173 LDIM: ACC <- VAL(CR); SR
     (0xA0, 0x00, 0x00, 0x00, 0x02, 0x00),  # 174 -> COMMON
-  # --- G111 ---
+    # --- G111 ---
     (0x40, 0x00, 0x00, 0x00, 0x02, 0x00),  # 175 HLT: halt
 ]
 
@@ -237,24 +240,62 @@ ACC, IP, DR, CR, SP, AR, SR = 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40
 
 FN, FZ, FO, FC = 0, 1, 2, 3
 
-ALU_AND, ALU_OR, ALU_NOT, ALU_XOR, ALU_NEG, ALU_ADD, ALU_SUB, ALU_MUL, \
-    ALU_DIV, ALU_ADC, ALU_CMP, ALU_INC, ALU_DEC, ALU_ADD4 = range(14)
+(
+    ALU_AND,
+    ALU_OR,
+    ALU_NOT,
+    ALU_XOR,
+    ALU_NEG,
+    ALU_ADD,
+    ALU_SUB,
+    ALU_MUL,
+    ALU_DIV,
+    ALU_ADC,
+    ALU_CMP,
+    ALU_INC,
+    ALU_DEC,
+    ALU_ADD4,
+) = range(14)
 
 COM_VAL, COM_SHL, COM_SHR, COM_ASL, COM_ASR, COM_CLO, COM_CLC = (1 << i for i in range(7))
 
 OPTAB = {
-    0x00: ("DEC", "noarg"), 0x01: ("INC", "noarg"), 0x02: ("NEG", "noarg"),
-    0x03: ("NOT", "noarg"), 0x05: ("XOR", "addr"), 0x06: ("OR", "addr"),
-    0x07: ("AND", "addr"), 0x0A: ("CMP", "addr"), 0x0B: ("ADC", "addr"),
-    0x0C: ("DIV", "addr"), 0x0D: ("MUL", "addr"), 0x0E: ("SUB", "addr"),
-    0x0F: ("ADD", "addr"), 0x12: ("CLC", "noarg"), 0x13: ("CLO", "noarg"),
-    0x14: ("ASR", "noarg"), 0x15: ("ASL", "noarg"), 0x16: ("SHR", "noarg"),
-    0x17: ("SHL", "noarg"), 0x18: ("BOC", "label"), 0x19: ("BCC", "label"),
-    0x1A: ("BOS", "label"), 0x1B: ("BCS", "label"), 0x1C: ("BGZ", "label"),
-    0x1D: ("BLZ", "label"), 0x1E: ("BEZ", "label"), 0x1F: ("JMP", "label"),
-    0x24: ("WR", "byteaddr"), 0x25: ("RD", "byteaddr"), 0x26: ("ST", "addr"),
-    0x27: ("LD", "addr"), 0x2D: ("SSP", "noarg"), 0x2E: ("RET", "noarg"),
-    0x2F: ("CALL", "label"), 0x36: ("ADDIM", "value"), 0x37: ("LDIM", "value"),
+    0x00: ("DEC", "noarg"),
+    0x01: ("INC", "noarg"),
+    0x02: ("NEG", "noarg"),
+    0x03: ("NOT", "noarg"),
+    0x05: ("XOR", "addr"),
+    0x06: ("OR", "addr"),
+    0x07: ("AND", "addr"),
+    0x0A: ("CMP", "addr"),
+    0x0B: ("ADC", "addr"),
+    0x0C: ("DIV", "addr"),
+    0x0D: ("MUL", "addr"),
+    0x0E: ("SUB", "addr"),
+    0x0F: ("ADD", "addr"),
+    0x12: ("CLC", "noarg"),
+    0x13: ("CLO", "noarg"),
+    0x14: ("ASR", "noarg"),
+    0x15: ("ASL", "noarg"),
+    0x16: ("SHR", "noarg"),
+    0x17: ("SHL", "noarg"),
+    0x18: ("BOC", "label"),
+    0x19: ("BCC", "label"),
+    0x1A: ("BOS", "label"),
+    0x1B: ("BCS", "label"),
+    0x1C: ("BGZ", "label"),
+    0x1D: ("BLZ", "label"),
+    0x1E: ("BEZ", "label"),
+    0x1F: ("JMP", "label"),
+    0x24: ("WR", "byteaddr"),
+    0x25: ("RD", "byteaddr"),
+    0x26: ("ST", "addr"),
+    0x27: ("LD", "addr"),
+    0x2D: ("SSP", "noarg"),
+    0x2E: ("RET", "noarg"),
+    0x2F: ("CALL", "label"),
+    0x36: ("ADDIM", "value"),
+    0x37: ("LDIM", "value"),
     0x3F: ("HLT", "noarg"),
 }
 INSTR_SIZE = {"noarg": 1, "value": 4, "byteaddr": 4, "addr": 5, "label": 5}
@@ -304,11 +345,11 @@ class DataPath:
     # --- memory ---
     def mem_read(self, a):
         a &= MASK
-        return int.from_bytes(self.mem[a:a + 4].ljust(4, b"\0"), "big")
+        return int.from_bytes(self.mem[a : a + 4].ljust(4, b"\0"), "big")
 
     def mem_write(self, a, v):
         a &= MASK
-        self.mem[a:a + 4] = (v & MASK).to_bytes(4, "big")
+        self.mem[a : a + 4] = (v & MASK).to_bytes(4, "big")
 
     # --- bus ---
     def bus(self, mask):
@@ -399,12 +440,12 @@ class ControlUnit:
     def tick(self):
         b0, b1, b2, b3, b4, b5 = MICROCODE[self.upc]
         self.tick_count += 1
-        if b0 & 0x80:                                  # control microinstruction
+        if b0 & 0x80:  # control microinstruction
             val = self.dp.bus(b5)
             bit = (val >> b2) & 1
             self.upc = b1 if bit ^ ((b0 >> 5) & 1) else self.upc + 1
             return
-        if b0 & 0x40:                                  # HLT
+        if b0 & 0x40:  # HLT
             raise HaltError("HLT")
         dp = self.dp
         com, dst, src = b1, b2, b5
@@ -413,16 +454,16 @@ class ControlUnit:
         in2 = dp.bus(src & ~ACC)
         res, c, o = dp.alu(alu_op, in1, in2)
         out, c_ov, o_ov = dp.commutate(com, res)
-        if b0 & 0x08:                                  # mem_rd
+        if b0 & 0x08:  # mem_rd
             out = dp.mem_read(dp.regs[AR])
-        if b0 & 0x02:                                  # io_rd
+        if b0 & 0x02:  # io_rd
             out = dp.io.read(dp.regs[AR] & 0xFF)
         dp.latch(dst, out)
         if dst & SR:
             self._update_flags(com, alu_op, out, c, o, c_ov, o_ov)
-        if b0 & 0x10:                                  # mem_wr
+        if b0 & 0x10:  # mem_wr
             dp.mem_write(dp.regs[AR], out)
-        if b0 & 0x04:                                  # io_wr
+        if b0 & 0x04:  # io_wr
             dp.io.write(dp.regs[AR] & 0xFF, out)
         self.upc += 1
 
@@ -440,7 +481,7 @@ class ControlUnit:
             dp.set_flag(FC, c_ov)
             dp.set_flag(FO, o_ov)
         elif com & (COM_SHL | COM_SHR):
-            pass                                       # logical shifts
+            pass  # logical shifts
         else:
             if c is not None:
                 dp.set_flag(FC, c)
@@ -457,7 +498,7 @@ def disasm_at(mem, addr):
     if mn is None or (indirect and kind != "addr"):
         return f"?? {op:02X}", f"{op:02X}", 1
     size = INSTR_SIZE[kind]
-    raw = bytes(mem[addr:addr + size])
+    raw = bytes(mem[addr : addr + size])
     hexcode = raw.hex().upper()
     if kind == "noarg":
         return mn, hexcode, size
@@ -471,21 +512,37 @@ def disasm_at(mem, addr):
 
 
 # Simulation and logging
-DEFAULT_FORMAT = ("{tick:6} | {iaddr:04X} | {hex:<10} | {mnemonic:<16} | "
-                  "ACC={acc:08X} IP={ip:08X} DR={dr:08X} CR={cr:08X} "
-                  "SP={sp:08X} AR={ar:08X} NZOC={n}{z}{o}{c}")
-TICK_FORMAT = ("{tick:6} | upc={upc:3} | ACC={acc:08X} IP={ip:08X} DR={dr:08X} "
-               "CR={cr:08X} SP={sp:08X} AR={ar:08X} SR={sr:08X}")
+DEFAULT_FORMAT = (
+    "{tick:6} | {iaddr:04X} | {hex:<10} | {mnemonic:<16} | "
+    "ACC={acc:08X} IP={ip:08X} DR={dr:08X} CR={cr:08X} "
+    "SP={sp:08X} AR={ar:08X} NZOC={n}{z}{o}{c}"
+)
+TICK_FORMAT = (
+    "{tick:6} | upc={upc:3} | ACC={acc:08X} IP={ip:08X} DR={dr:08X} "
+    "CR={cr:08X} SP={sp:08X} AR={ar:08X} SR={sr:08X}"
+)
 
 
 def log_fields(cu, dp, iaddr=0, mnemonic="", hexcode="", icount=0):
-    return dict(
-        tick=cu.tick_count, instr=icount, iaddr=iaddr, mnemonic=mnemonic,
-        hex=hexcode, upc=cu.upc,
-        acc=dp.regs[ACC], ip=dp.regs[IP], dr=dp.regs[DR], cr=dp.regs[CR],
-        sp=dp.regs[SP], ar=dp.regs[AR], sr=dp.regs[SR],
-        n=dp.flag(FN), z=dp.flag(FZ), o=dp.flag(FO), c=dp.flag(FC),
-    )
+    return {
+        "tick": cu.tick_count,
+        "instr": icount,
+        "iaddr": iaddr,
+        "mnemonic": mnemonic,
+        "hex": hexcode,
+        "upc": cu.upc,
+        "acc": dp.regs[ACC],
+        "ip": dp.regs[IP],
+        "dr": dp.regs[DR],
+        "cr": dp.regs[CR],
+        "sp": dp.regs[SP],
+        "ar": dp.regs[AR],
+        "sr": dp.regs[SR],
+        "n": dp.flag(FN),
+        "z": dp.flag(FZ),
+        "o": dp.flag(FO),
+        "c": dp.flag(FC),
+    }
 
 
 def fmt_buf(buf, mode):
@@ -519,7 +576,7 @@ def simulate(image, io_bufs, cfg, log=print):
                 log(fmt.format(**log_fields(cu, dp, icount=icount)))
     except HaltError as e:
         stop = str(e)
-    return dict(io=io, dp=dp, cu=cu, instructions=icount, stop=stop)
+    return {"io": io, "dp": dp, "cu": cu, "instructions": icount, "stop": stop}
 
 
 def parse_inputs(cfg):
@@ -553,8 +610,10 @@ def main():
 
     res = simulate(image, io_bufs, cfg)
 
-    print(f"\n halt: {res['stop']}; instructions: {res['instructions']}, "
-          f" ticks: {res['cu'].tick_count}")
+    print(
+        f"\n halt: {res['stop']}; instructions: {res['instructions']}, "
+        f" ticks: {res['cu'].tick_count}"
+    )
     for port in sorted(res["io"].out):
         buf = res["io"].out[port]
         if buf:
@@ -565,8 +624,10 @@ def main():
         got = res["io"].out.get(int(port), [])
         status = "OK" if got == list(expected) else "FAIL"
         failed |= status == "FAIL"
-        print(f"assert port {port}: {status}"
-              + ("" if status == "OK" else f" (expected {expected}, got {got})"))
+        print(
+            f"assert port {port}: {status}"
+            + ("" if status == "OK" else f" (expected {expected}, got {got})")
+        )
     sys.exit(1 if failed else 0)
 
 
