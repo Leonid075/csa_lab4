@@ -1,13 +1,13 @@
-; hello — печать статической строки "Hello, world!" в порт 1
+; hello — печать "Hello, world!" в порт 1
 .text
-        LD (msg)            ; ACC = длина (слово длины pstr)
+        LD (msg)
         ST (cnt)
         LDIM msg
         ADDIM 4
-        ST (ptr)            ; ptr -> первый символ
+        ST (ptr)
 loop:   LD (cnt)
         BEZ (done)
-        LD ([ptr])          ; ACC = символ
+        LD ([ptr])
         WR 1
         LD (ptr)
         ADDIM 4

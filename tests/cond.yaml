@@ -1,4 +1,4 @@
 trace: none
 io_format: char
 assert_output:
-  1: [52, 32, 48]
+  1: [66, 67]

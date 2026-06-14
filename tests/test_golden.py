@@ -5,7 +5,7 @@ from conftest import assemble
 
 HERE = pathlib.Path(__file__).parent
 
-# (имя, inputs, cfg, {порт: ожидаемый вывод})
+# (name, inputs, cfg, assert)
 CASES = [
     (
         "cat",
@@ -35,13 +35,25 @@ CASES = [
         "dpsum",
         {},
         {},
-        {1: [52, 32, 48]},  # "4 0"
+        {1: [52, 32, 48]},
     ),
     (
         "prob1",
         {},
         {"limit_ticks": 50_000_000, "limit_instructions": 5_000_000},
-        {1: [9, 0, 6, 6, 0, 9]},  # цифры как числа, не ASCII
+        {1: [9, 0, 6, 6, 0, 9]},
+    ),
+    (
+        "macros",
+        {},
+        {},
+        {1: [65, 66]},
+    ),
+    (
+        "cond",
+        {},
+        {},
+        {1: [66, 67]},
     ),
 ]
 
@@ -83,3 +95,11 @@ def test_dpsum():
 
 def test_prob1():
     check(*CASES[5])
+
+
+def test_macros():
+    check(*CASES[6])
+
+
+def test_cond():
+    check(*CASES[7])

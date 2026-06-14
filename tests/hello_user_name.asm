@@ -1,16 +1,14 @@
-; hello_user_name — читает имя из порта 0 (до байта-терминатора 0),
-; печатает "Hello, " + имя + "!" в порт 1.
+; hello_user_name — читает имя из порта 0 (до байта-терминатора 0), печатает "Hello, " + имя + "!" в порт 1.
 .text
         LDIM 0x2000
-        SSP                     ; стек для CALL
-        ; --- читаем имя в pstr-буфер buf ---
+        SSP
         LDIM 0
-        ST (ncnt)               ; счётчик символов
+        ST (ncnt)
         LDIM buf
         ADDIM 4
-        ST (nptr)               ; nptr -> buf+4 (первый символ)
-rd:     RD 0                    ; RD ставит N/Z
-        BEZ (rd_end)            ; 0 -> конец имени
+        ST (nptr)
+rd:     RD 0
+        BEZ (rd_end)
         ST ([nptr])
         LD (nptr)
         ADDIM 4
@@ -20,8 +18,7 @@ rd:     RD 0                    ; RD ставит N/Z
         ST (ncnt)
         JMP (rd)
 rd_end: LD (ncnt)
-        ST (buf)                ; длина -> buf становится pstr
-        ; --- печать: префикс, имя, суффикс ---
+        ST (buf)
         LDIM pre
         ST (sarg)
         CALL (print_pstr)
@@ -33,13 +30,12 @@ rd_end: LD (ncnt)
         CALL (print_pstr)
         HLT
 
-; print_pstr: печатает pstr, адрес которой лежит в (sarg)
 print_pstr:
-        LD ([sarg])             ; ACC = длина = mem[mem[sarg]]
+        LD ([sarg])
         ST (pcnt)
         LD (sarg)
         ADDIM 4
-        ST (pp)                 ; pp -> первый символ
+        ST (pp)
 pp_l:   LD (pcnt)
         BEZ (pp_d)
         LD ([pp])
@@ -61,4 +57,4 @@ pcnt:   .word 0
 pp:     .word 0
 ncnt:   .word 0
 nptr:   .word 0
-buf:    .word 0                 ; длина имени; далее символы (растёт в нулевую память)
+buf:    .word 0

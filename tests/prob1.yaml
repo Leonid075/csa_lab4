@@ -3,4 +3,4 @@ limit_ticks: 50000000
 limit_instructions: 5000000
 io_format: int
 assert_output:
-  1: [9, 0, 6, 6, 0, 9]   # цифры как числа, не ASCII
+  1: [9, 0, 6, 6, 0, 9]

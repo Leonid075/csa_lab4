@@ -1,44 +1,39 @@
-; prob1 (Euler #4) — наибольший палиндром, равный произведению двух трёхзначных
-; чисел. Ответ: 906609 = 913 * 993.
-;
-; Перебор с отсечениями: a от 999 вниз; b от 999 вниз до a (b >= a, без дублей).
-; Произведения a*b убывают => как только a*b <= best, внутренний цикл прерывается.
-; Если максимум для текущего a (a*999) уже <= best — внешний цикл завершается.
+; prob1 (Euler #4) — наибольший палиндром, равный произведению двух трёхзначных чисел.
 .text
         LDIM 0x3000
-        SSP                     ; стек для CALL
+        SSP
         LDIM 0
         ST (best)
         LDIM 999
         ST (a)
 o_loop: LD (a)
         CMP (hundred)
-        BLZ (done)              ; a < 100 -> конец
+        BLZ (done)
         LD (a)
-        MUL (n999)              ; a*999 — максимум для этого a
+        MUL (n999)
         CMP (best)
-        BLZ (done)              ; a*999 < best  -> улучшить нельзя
-        BEZ (done)              ; a*999 == best
+        BLZ (done)
+        BEZ (done)
         LDIM 999
         ST (b)
 i_loop: LD (b)
         CMP (a)
-        BLZ (next_a)            ; b < a -> к следующему a
+        BLZ (next_a)
         LD (a)
-        MUL (b)                 ; p = a*b
+        MUL (b)
         ST (p)
         CMP (best)
-        BLZ (next_a)            ; p < best -> прервать внутренний (дальше только меньше)
-        BEZ (next_a)            ; p == best
+        BLZ (next_a)
+        BEZ (next_a)
         ; палиндром?
         LD (p)
         ST (rvn)
-        CALL (reverse)          ; ACC = развёрнутое(p)
+        CALL (reverse)
         CMP (p)
         BEZ (is_pal)
         JMP (dec_b)
 is_pal: LD (p)
-        ST (best)               ; p > best (проверено) и палиндром
+        ST (best)
 dec_b:  LD (b)
         DEC
         ST (b)
@@ -51,7 +46,6 @@ done:   LD (best)
         CALL (print_digits)
         HLT
 
-; reverse: (rvn) -> ACC = число с обратным порядком десятичных цифр
 reverse:
         LDIM 0
         ST (rev)
@@ -60,25 +54,22 @@ reverse:
 rv_l:   LD (rvm)
         BEZ (rv_d)
         DIV (ten)
-        ST (rvq)                ; q = m/10
+        ST (rvq)
         MUL (ten)
         ST (rvt)
         LD (rvm)
-        SUB (rvt)               ; цифра = m - (m/10)*10
+        SUB (rvt)
         ST (rvdig)
         LD (rev)
         MUL (ten)
         ADD (rvdig)
-        ST (rev)                ; rev = rev*10 + цифра
+        ST (rev)
         LD (rvq)
         ST (rvm)
         JMP (rv_l)
 rv_d:   LD (rev)
         RET
 
-; print_digits: печатает ACC (>=0) по одной десятичной цифре в порт 1.
-; Цифры выводятся как числа 0..9 (без ASCII-смещения).
-; Делит на 10, собирает цифры в dbuf, печатает в обратном порядке.
 print_digits:
         ST (pdn)
         LDIM dbuf
@@ -92,9 +83,9 @@ pd_div: LD (pdn)
         DIV (ten)
         ST (pdq)
         MUL (ten)
-        ST (pdt)                ; (n/10)*10
+        ST (pdt)
         LD (pdn)
-        SUB (pdt)               ; цифра = n - (n/10)*10
+        SUB (pdt)
         ST ([dp])
         LD (dp)
         ADDIM 4
@@ -103,7 +94,7 @@ pd_div: LD (pdn)
         INC
         ST (dc)
         LD (pdq)
-        ST (pdn)                ; n = n/10
+        ST (pdn)
         JMP (pd_div)
 pd_emit:
         LD (dc)

@@ -1,24 +1,21 @@
-; dpsum — 64-битная сумма двух чисел (hi:lo) через ADD (младшие) + ADC (старшие).
-; Печатает "hi lo" в десятичном виде. Демонстрирует перенос между словами.
+; dpsum — 64-битная сумма двух чисел.
 .text
         LDIM 0x2000
         SSP
         LD (a_lo)
-        ADD (b_lo)              ; младшие слова, выставляет C
+        ADD (b_lo)
         ST (r_lo)
         LD (a_hi)
-        ADC (b_hi)              ; старшие + перенос (LD/ST не трогают C)
+        ADC (b_hi)
         ST (r_hi)
         LD (r_hi)
         CALL (print_decimal)
-        LDIM 32                 ; ' '
+        LDIM 32
         WR 1
         LD (r_lo)
         CALL (print_decimal)
         HLT
 
-; print_decimal: печатает ACC (>=0) в десятичном ASCII в порт 1.
-; Делит на 10, собирает цифры в dbuf, печатает в обратном порядке.
 print_decimal:
         ST (pdn)
         LDIM dbuf
@@ -32,10 +29,10 @@ pd_div: LD (pdn)
         DIV (ten)
         ST (pdq)
         MUL (ten)
-        ST (pdt)                ; (n/10)*10
+        ST (pdt)
         LD (pdn)
-        SUB (pdt)               ; цифра = n - (n/10)*10
-        ADDIM 48                ; '0' + цифра
+        SUB (pdt)
+        ADDIM 48
         ST ([dp])
         LD (dp)
         ADDIM 4
@@ -44,7 +41,7 @@ pd_div: LD (pdn)
         INC
         ST (dc)
         LD (pdq)
-        ST (pdn)                ; n = n/10
+        ST (pdn)
         JMP (pd_div)
 pd_emit:
         LD (dc)

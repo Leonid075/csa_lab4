@@ -1,10 +1,7 @@
-; sort — читает N (порт 0), затем N байт, сортирует по возрастанию (беззнаково),
-; выводит N отсортированных байт в порт 1.
+; sort — читает N (порт 0), затем N байт, сортирует по возрастанию, выводит в порт 1.
 .text
-        ; --- читаем количество ---
         RD 0
         ST (n)
-        ; --- читаем N значений в arr ---
         LDIM arr
         ST (ptr)
         LD (n)
@@ -21,26 +18,25 @@ rd_l:   LD (cnt)
         ST (cnt)
         JMP (rd_l)
 rd_d:
-        ; --- пузырьковая сортировка ---
         LD (n)
         DEC
-        ST (outer)              ; outer = n-1 проходов
+        ST (outer)
 out_l:  LD (outer)
         BEZ (sorted)
         LD (n)
         DEC
-        ST (inner)              ; inner = n-1 сравнений
+        ST (inner)
         LDIM arr
         ST (jp)
 in_l:   LD (inner)
         BEZ (in_d)
         LD (jp)
         ADDIM 4
-        ST (jn)                 ; jn -> следующий элемент
+        ST (jn)
         LD ([jp])
-        CMP ([jn])              ; arr[j] - arr[j+1]
-        BCC (no_sw)             ; arr[j] < arr[j+1] -> не менять
-        BEZ (no_sw)             ; равны -> не менять
+        CMP ([jn])
+        BCC (no_sw)
+        BEZ (no_sw)
         ; обмен
         LD ([jp])
         ST (tmp)
@@ -86,4 +82,4 @@ inner:  .word 0
 jp:     .word 0
 jn:     .word 0
 tmp:    .word 0
-arr:    .word 0                 ; начало массива (растёт в нулевую память)
+arr:    .word 0
