@@ -336,11 +336,12 @@ class IOController:
 class DataPath:
     """Registers, memory (byte-addressed, 32-bit port, big-endian), ALU, commutator."""
 
-    def __init__(self, image: bytes, io: IOController, mem_size=1 << 16):
+    def __init__(self, image: bytes, io: IOController, mem_size=1 << 16, start=0):
         self.mem = bytearray(max(mem_size, len(image)))
         self.mem[: len(image)] = image
         self.io = io
-        self.regs = {ACC: 0, IP: 0, DR: 0, CR: 0, SP: 0, AR: 0, SR: 0}
+        # IP starts at the entry point (`start`); all other registers at 0.
+        self.regs = {ACC: 0, IP: start & MASK, DR: 0, CR: 0, SP: 0, AR: 0, SR: 0}
 
     # --- memory ---
     def mem_read(self, a):
@@ -555,7 +556,7 @@ def fmt_buf(buf, mode):
 
 def simulate(image, io_bufs, cfg, log=print):
     io = IOController(io_bufs)
-    dp = DataPath(image, io)
+    dp = DataPath(image, io, start=cfg.get("start", 0))
     cu = ControlUnit(dp)
     limit_t = cfg.get("limit_ticks", 1_000_000)
     limit_i = cfg.get("limit_instructions", 100_000)
@@ -605,6 +606,7 @@ def main():
 
     io_bufs = parse_inputs(cfg)
     io_fmt = cfg.get("io_format", "int")
+    print(f"entry point: 0x{cfg.get('start', 0):X}")
     for port in sorted(io_bufs):
         print(f"input port {port}: {fmt_buf(io_bufs[port], io_fmt)}")
 

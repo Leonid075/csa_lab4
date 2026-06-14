@@ -1,0 +1,4 @@
+trace: none
+io_format: char
+assert_output:
+  1: [65, 66, 65]

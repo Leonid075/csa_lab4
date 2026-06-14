@@ -55,6 +55,12 @@ CASES = [
         {},
         {1: [66, 67]},
     ),
+    (
+        "org",
+        {},
+        {"start": 0x100},
+        {1: [65, 66, 65]},
+    ),
 ]
 
 
@@ -103,3 +109,28 @@ def test_macros():
 
 def test_cond():
     check(*CASES[7])
+
+
+def test_org():
+    check(*CASES[8])
+
+
+def test_org_layout_is_sequential():
+    """`.org` размещает данные/код по абсолютным адресам в порядке записи."""
+    image = assemble((HERE / "org.asm").read_text(encoding="utf-8"))
+    assert image[0x00:0x04] == bytes([0, 0, 0, 65])
+    assert image[0x10:0x14] == bytes([0, 0, 0, 66])
+    assert image[0x14:0x18] == bytes([0, 0, 0, 0x00])
+    assert image[0x100] == 0x27
+
+
+def test_org_entry_point_separates_code_from_data():
+    """Точка входа отделяет код от данных в начале образа."""
+    image = assemble((HERE / "org.asm").read_text(encoding="utf-8"))
+    bufs = machine.parse_inputs({"inputs": {}})
+
+    from_entry = machine.simulate(image, bufs, {"start": 0x100}, log=lambda *a, **k: None)
+    assert from_entry["instructions"] == 7
+
+    from_zero = machine.simulate(image, bufs, {}, log=lambda *a, **k: None)
+    assert from_zero["instructions"] > from_entry["instructions"]

@@ -176,23 +176,26 @@ def str_size(text: str) -> int:
     return 4 * (1 + len(text))
 
 
-def _layout_section(
-    tokens: list[tuple[int, str]],
-    start_pc: int,
-    labels: dict[str, int],
-) -> tuple[list[tuple[int, int, str]], int]:
-    """Lay out one sections tokens from start_pc."""
+def first_pass(tokens: list[tuple[int, str]]) -> tuple[dict[str, int], list[tuple[int, int, str]]]:
+    """Single sequential pass: code and data are laid out in source order.
+
+    ``.text``/``.data`` are accepted but no longer split the image into blocks;
+    they are ignored for layout. ``.org`` simply moves the write pointer, and
+    everything after it continues sequentially.
+    """
+    labels: dict[str, int] = {}
     instructions: list[tuple[int, int, str]] = []
-    pc = start_pc
-    end = start_pc
+    pc = 0
 
     for lineno, line in tokens:
-        if line.startswith(".org"):
+        head = line.split(None, 1)[0]
+        if head in (".text", ".data"):
+            continue
+        if head == ".org":
             parts = line.split(None, 1)
             if len(parts) < 2:
                 raise SyntaxError(f"Line {lineno}: .org requires address")
             pc = parse_value(parts[1])
-            end = max(end, pc)
             continue
 
         rest = line
@@ -217,33 +220,7 @@ def _layout_section(
                 raise SyntaxError(f"Line {lineno}: unknown mnemonic '{mnemonic}'")
             pc += I_SIZE[ASM[mnemonic][0]]
 
-        end = max(end, pc)
-
-    return instructions, end
-
-
-def first_pass(tokens: list[tuple[int, str]]) -> tuple[dict[str, int], list[tuple[int, int, str]]]:
-    """First pass with section support."""
-    labels: dict[str, int] = {}
-    text_toks: list[tuple[int, str]] = []
-    data_toks: list[tuple[int, str]] = []
-    cur = text_toks
-
-    for lineno, line in tokens:
-        if line.startswith("."):
-            name = line.split()[0]
-            if name == ".text":
-                cur = text_toks
-            elif name == ".data":
-                cur = data_toks
-            else:
-                raise SyntaxError(f"Line {lineno}: unknown section '{name}' ")
-            continue
-        cur.append((lineno, line))
-
-    text_instrs, text_end = _layout_section(text_toks, 0, labels)
-    data_instrs, _ = _layout_section(data_toks, text_end, labels)
-    return labels, text_instrs + data_instrs
+    return labels, instructions
 
 
 def decode_string(s: str) -> str:
@@ -300,16 +277,14 @@ def second_pass(
 
     for lineno, addr, line in instructions:
         # ---- Data directives ----
-        if line.startswith(".word"):
-            arg = line.split(None, 1)[1].strip() if " " in line else "0"
-            value = resolve(arg, labels, lineno, ".word value")
+        if line.startswith((".word", ".byte")):
+            parts = line.split(None, 1)
+            name = parts[0]
+            arg = parts[1] if len(parts) > 1 else "0"
+            value = resolve(arg, labels, lineno, f"{name} value")
+            if name == ".byte":
+                value &= 0xFF
             emit(addr, encode_u32_be(value))
-            continue
-
-        if line.startswith(".byte"):
-            arg = line.split(None, 1)[1].strip() if " " in line else "0"
-            value = resolve(arg, labels, lineno, ".byte value")
-            emit(addr, encode_u32_be(value & 0xFF))
             continue
 
         if line.startswith(".str"):
