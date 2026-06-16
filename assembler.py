@@ -407,6 +407,9 @@ if __name__ == "__main__":
     args = parse_args()
     assert os.path.exists(args.asm_file), f"File not found: {args.asm_file}"
     os.makedirs(os.path.dirname(args.bin_file) or ".", exist_ok=True)
-    with open(args.asm_file, encoding="utf-8") as asm, io.FileIO(args.bin_file, "wb") as bin_out:
-        with open(args.listing, "w", encoding="utf-8") as lst:
-            translate(asm, bin_out, lst)
+    with (
+        open(args.asm_file, encoding="utf-8") as asm,
+        io.FileIO(args.bin_file, "wb") as bin_out,
+        open(args.listing, "w", encoding="utf-8") as lst,
+    ):
+        translate(asm, bin_out, lst)
