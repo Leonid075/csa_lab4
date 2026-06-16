@@ -177,12 +177,7 @@ def str_size(text: str) -> int:
 
 
 def first_pass(tokens: list[tuple[int, str]]) -> tuple[dict[str, int], list[tuple[int, int, str]]]:
-    """Single sequential pass: code and data are laid out in source order.
-
-    ``.text``/``.data`` are accepted but no longer split the image into blocks;
-    they are ignored for layout. ``.org`` simply moves the write pointer, and
-    everything after it continues sequentially.
-    """
+    """Single sequential pass: code and data are laid out in source order."""
     labels: dict[str, int] = {}
     instructions: list[tuple[int, int, str]] = []
     pc = 0
@@ -400,9 +395,11 @@ def parse_args():
         "--listing", "-l", help="optional debug listing output (<addr> - <hexcode> - <mnemonic>)"
     )
     args = parser.parse_args()
+    base = os.path.splitext(os.path.basename(args.asm_file))[0]
     if args.bin_file is None:
-        base = os.path.splitext(os.path.basename(args.asm_file))[0]
         args.bin_file = os.path.join("tmp", base + ".bin")
+    if args.listing is None:
+        args.listing = os.path.join("tmp", base + ".lst")
     return args
 
 
@@ -411,8 +408,5 @@ if __name__ == "__main__":
     assert os.path.exists(args.asm_file), f"File not found: {args.asm_file}"
     os.makedirs(os.path.dirname(args.bin_file) or ".", exist_ok=True)
     with open(args.asm_file, encoding="utf-8") as asm, io.FileIO(args.bin_file, "wb") as bin_out:
-        if args.listing:
-            with open(args.listing, "w", encoding="utf-8") as lst:
-                translate(asm, bin_out, lst)
-        else:
-            translate(asm, bin_out)
+        with open(args.listing, "w", encoding="utf-8") as lst:
+            translate(asm, bin_out, lst)
