@@ -25,7 +25,6 @@ i_loop: LD (b)
         CMP (best)
         BLZ (next_a)
         BEZ (next_a)
-        ; палиндром?
         LD (p)
         ST (rvn)
         CALL (reverse)

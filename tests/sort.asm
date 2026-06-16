@@ -37,7 +37,6 @@ in_l:   LD (inner)
         CMP ([jn])
         BCC (no_sw)
         BEZ (no_sw)
-        ; обмен
         LD ([jp])
         ST (tmp)
         LD ([jn])
@@ -56,7 +55,6 @@ in_d:   LD (outer)
         ST (outer)
         JMP (out_l)
 sorted:
-        ; --- вывод ---
         LDIM arr
         ST (ptr)
         LD (n)
