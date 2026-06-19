@@ -1,6 +1,6 @@
 trace: none
 io_format: char
 inputs:
-  0: "Meow"
+  0: "Meow\n"
 assert_output:
-  1: [77, 101, 111, 119]
+  1: [77, 101, 111, 119, 10]
